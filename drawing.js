@@ -1,3 +1,4 @@
+const socket = io();
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -46,5 +47,12 @@ function draw(e) {
   e.preventDefault();
   const pos = getPointerPos(e);
   drawLine(lastPos, pos);
+
+  socket.emit("draw", { from: lastPos, to: pos });
+
   lastPos = pos;
 }
+
+socket.on("draw", (data) => {
+  drawLine(data.from, data.to);
+});

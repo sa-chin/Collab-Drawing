@@ -2,8 +2,23 @@ const socket = io();
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+function resizeCanvas() {
+    const size = Math.min(window.innerWidth, window.innerHeight - 100);
+    canvas.width = size;
+    canvas.height = size;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
 let drawing = false;
-let lastPos = { x: 0, y: 0 };
+let lastPos = null;
+
+const timerEl = document.getElementById("timer");
+
+socket.on("draw", (stroke) => drawLine(scale(stroke.from), scale(stroke.to), stroke.color, stroke.width));
+socket.on("loadCanvas", (strokes) => strokes.forEach(s => drawLine(scale(s.from), scale(s.to), s.color, s.width)));
+socket.on("setGoal", (goal) => document.getElementById("goal").textContent = `Goal: ${goal}`);
+socket.on("timer", (ms) => updateTimer(ms));
 
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
@@ -17,7 +32,11 @@ canvas.addEventListener('touchend', stopDrawing);
 function getPointerPos(e) {
   const rect = canvas.getBoundingClientRect();
   const point = e.touches ? e.touches[0] : e;
-  return { x: point.clientX - rect.left, y: point.clientY - rect.top };
+  return { x: (point.clientX - rect.left) / canvas.width, y: (point.clientY - rect.top) / canvas.height };
+}
+
+function scale(pos) { 
+    return { x: pos.x * canvas.width, y: pos.y * canvas.height }; 
 }
 
 function drawLine(from, to, color = '#111827', width = 4) {
@@ -46,11 +65,18 @@ function draw(e) {
   if (!drawing) return;
   e.preventDefault();
   const pos = getPointerPos(e);
-  drawLine(lastPos, pos);
+  drawLine(scale(lastPos), scale(pos));
 
-  socket.emit("draw", { from: lastPos, to: pos });
+  socket.emit("draw", { from: lastPos, to: pos, color: "#111827", width: 4 });
 
   lastPos = pos;
+}
+
+function updateTimer(ms) {
+    const sec = Math.floor(ms / 1000);
+    const min = Math.floor(sec / 60);
+    const seconds = sec % 60;
+    timerEl.textContent = `Time left: ${min}:${seconds.toString().padStart(2, "0")}`;
 }
 
 socket.on("draw", (data) => {

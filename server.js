@@ -26,6 +26,10 @@ io.on("connection", (socket) => {
         socket.broadcast.emit("draw", stroke);
     });
 
+    socket.on("requestCanvas", () => {
+        socket.emit("loadVancas", canvas);
+    });
+
     socket.on("disconnect", () => {
         console.log("A user disconnected");
     });

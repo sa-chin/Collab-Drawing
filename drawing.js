@@ -15,6 +15,11 @@ let lastPos = null;
 
 const timerEl = document.getElementById("timer");
 
+socket.on("connect", () => {
+  console.log("Connected, requesting canvas");
+  socket.emit("requestCanvas")
+});
+
 socket.on("draw", (stroke) => drawLine(scale(stroke.from), scale(stroke.to), stroke.color, stroke.width));
 socket.on("loadCanvas", (strokes) => strokes.forEach(s => drawLine(scale(s.from), scale(s.to), s.color, s.width)));
 socket.on("setGoal", (goal) => document.getElementById("goal").textContent = `Goal: ${goal}`);

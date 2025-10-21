@@ -24,6 +24,7 @@ socket.on("draw", (stroke) => drawLine(scale(stroke.from), scale(stroke.to), str
 socket.on("loadCanvas", (strokes) => strokes.forEach(s => drawLine(scale(s.from), scale(s.to), s.color, s.width)));
 socket.on("setGoal", (goal) => document.getElementById("goal").textContent = `Goal: ${goal}`);
 socket.on("timer", (ms) => updateTimer(ms));
+socket.on("clearCanvas", () => {ctx.clearRect(0, 0, canvas.width, canvas.height)});
 
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);

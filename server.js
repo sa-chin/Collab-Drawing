@@ -27,7 +27,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("requestCanvas", () => {
-        socket.emit("loadVancas", canvas);
+        socket.emit("loadCanvas", canvas);
     });
 
     socket.on("disconnect", () => {

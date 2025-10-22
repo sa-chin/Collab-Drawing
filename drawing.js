@@ -2,6 +2,12 @@ const socket = io();
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+let currentColor = "#111827";
+const colorPicker = document.getElementById("colorPicker");
+colorPicker.addEventListener("input", (e) => {
+  currentColor = e.target.value;
+});
+
 function resizeCanvas() {
     const size = Math.min(window.innerWidth, window.innerHeight - 100);
     canvas.width = size;
@@ -45,7 +51,7 @@ function scale(pos) {
     return { x: pos.x * canvas.width, y: pos.y * canvas.height }; 
 }
 
-function drawLine(from, to, color = '#111827', width = 4) {
+function drawLine(from, to, color = currentColor, width = 4) {
   ctx.strokeStyle = color;
   ctx.lineWidth = width;
   ctx.lineCap = 'round';
@@ -73,7 +79,7 @@ function draw(e) {
   const pos = getPointerPos(e);
   drawLine(scale(lastPos), scale(pos));
 
-  socket.emit("draw", { from: lastPos, to: pos, color: "#111827", width: 4 });
+  socket.emit("draw", { from: lastPos, to: pos, color: currentColor, width: 4 });
 
   lastPos = pos;
 }
@@ -84,7 +90,3 @@ function updateTimer(ms) {
     const seconds = sec % 60;
     timerEl.textContent = `Time left: ${min}:${seconds.toString().padStart(2, "0")}`;
 }
-
-socket.on("draw", (data) => {
-  drawLine(data.from, data.to);
-});
